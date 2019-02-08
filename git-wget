@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+
+function cmdcheck() { type >/dev/null 2>&1 "$@"; }
+! cmdcheck git && echo 1>&2 'Not found git command' && return 1
+
+function abspath() {
+	[[ $1 =~ ^/* ]] && printf '%s' "$1" || printf '%s' "$PWD/${1#./}"
+}
+
+function help() {
+	echo "$(basename $0) [git urls] (-O output_path)"
+	exit 1
+}
+function git_wget_main() {
+	local dst_path="$PWD"
+	[[ $# -lt 1 ]] && help
+	local url="$1"
+	if [[ $# -ge 2 ]]; then
+		if [[ $2 == '-O' ]] && [[ -n $3 ]]; then
+			dst_path=$(abspath $3)
+		else
+			help
+		fi
+	fi
+
+	# NOTE: setup git clone tmp dir
+	if [[ -z $GIT_WGET_TMP_DIR ]]; then
+		GIT_WGET_TMP_DIR=$(mktemp -d "/tmp/$(basename $0).$$.tmp.XXXXXX")
+		[[ -z $GIT_WGET_DEBUG ]] && trap "[[ -d $GIT_WGET_TMP_DIR ]] && rm -rf $GIT_WGET_TMP_DIR" 0 1 2 3 15
+	else
+		mkdir -p "$GIT_WGET_TMP_DIR" || exit $?
+	fi
+	pushd $GIT_WGET_TMP_DIR >/dev/null 2>&1
+	[[ -n $GIT_WGET_DEBUG ]] && echo 1>&2 "[tmp dir]: $GIT_WGET_TMP_DIR"
+
+	local clone_url
+	local target_path
+	# TODO: update for blob/$branch
+	clone_url=$(printf '%s' "$url" | sed -E 's:^(.*)/(tree|blob)/[^/]*/.*$:\1:g')
+	target_path=$(printf '%s' "$url" | sed -E 's:^.*/(tree|blob)/[^/]*/(.*)$:\2:g')
+	[[ -z $clone_url ]] && echo "Cannot get clone url from '$url'" && return 1
+	[[ -z $target_path ]] && echo "Cannot get target path from '$url'" && return 1
+	local repo_name
+	repo_name=$(printf '%s' "$url" | sed -E 's:^.*/github.com/[^/]*/([^/]*)/(.*)$:\1:g')
+	[[ -z $repo_name ]] && echo "Cannot get repo name from '$url'" && return 1
+	if [[ ! -e $repo_name ]]; then
+		git clone --depth 1 "$clone_url" || return 1
+	else
+		pushd "$repo_name" >/dev/null 2>&1
+		# NOTE: shallow clone
+		git fetch --depth 1 || return 1
+		popd >/dev/null 2>&1
+	fi
+	cp -R "$repo_name/$target_path" "$dst_path" || return 1
+	popd >/dev/null 2>&1
+}
+
+git_wget_main "$@"
