@@ -4,7 +4,7 @@ function cmdcheck() { type >/dev/null 2>&1 "$@"; }
 ! cmdcheck git && echo 1>&2 'Not found git command' && return 1
 
 function abspath() {
-	[[ $1 =~ ^/* ]] && printf '%s' "$1" || printf '%s' "$PWD/${1#./}"
+	[[ $1 =~ ^/.* ]] && printf '%s' "$1" || printf '%s' "$PWD/${1#./}"
 }
 
 function help() {
@@ -31,7 +31,7 @@ function git_wget_main() {
 		mkdir -p "$GIT_WGET_TMP_DIR" || exit $?
 	fi
 	pushd $GIT_WGET_TMP_DIR >/dev/null 2>&1
-	[[ -n $GIT_WGET_DEBUG ]] && echo 1>&2 "[tmp dir]: $GIT_WGET_TMP_DIR"
+	[[ -n $GIT_WGET_DEBUG ]] && echo 1>&2 "[DEBUG][tmp dir]: $GIT_WGET_TMP_DIR"
 
 	local clone_url
 	local target_path
@@ -51,6 +51,7 @@ function git_wget_main() {
 		git fetch --depth 1 || return 1
 		popd >/dev/null 2>&1
 	fi
+	[[ -n $GIT_WGET_DEBUG ]] && echo 1>&2 '[DEBUG][command]' cp -R "$repo_name/$target_path" "$dst_path"
 	cp -R "$repo_name/$target_path" "$dst_path" || return 1
 	popd >/dev/null 2>&1
 }
