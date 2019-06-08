@@ -8,7 +8,7 @@ function abspath() {
 }
 
 function help() {
-	echo "$(basename $0) [git urls] (-O output_path)"
+	echo "$(basename $0) [git urls] (-O output_path)" 1>&2
 	exit 1
 }
 function git_wget_main() {
