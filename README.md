@@ -1,5 +1,7 @@
 # git-wget
 
+download some file or dir from GitHub url
+
 ## how to use
 ```
 git-wget https://github.com/umaumax/oressh/blob/master/oressh -O ~/local/bin/
@@ -15,3 +17,6 @@ install_path="$HOME/local/bin/git-wget"
 wget https://raw.githubusercontent.com/umaumax/git-wget/master/git-wget -O "$install_path"
 chmod u+x "$install_path"
 ```
+
+## FYI
+* [sdushantha/gitdir: 📁 Download a single directory/folder from a GitHub repo]( https://github.com/sdushantha/gitdir )
