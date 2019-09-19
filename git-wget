@@ -8,7 +8,7 @@ function abspath() {
 }
 
 function help() {
-  echo "$(basename $0) [git urls] (-O output_path)" 1>&2
+  echo "$(basename "$0") [git urls] (-O output_path)" 1>&2
   exit 1
 }
 function git_wget_main() {
@@ -17,7 +17,7 @@ function git_wget_main() {
   local url="$1"
   if [[ $# -ge 2 ]]; then
     if [[ $2 == '-O' ]] && [[ -n $3 ]]; then
-      dst_path=$(abspath $3)
+      dst_path=$(abspath "$3")
     else
       help
     fi
@@ -25,12 +25,14 @@ function git_wget_main() {
 
   # NOTE: setup git clone tmp dir
   if [[ -z $GIT_WGET_TMP_DIR ]]; then
-    GIT_WGET_TMP_DIR=$(mktemp -d "/tmp/$(basename $0).$$.tmp.XXXXXX")
-    [[ -z $GIT_WGET_DEBUG ]] && trap "[[ -d $GIT_WGET_TMP_DIR ]] && rm -rf $GIT_WGET_TMP_DIR" 0 1 2 3 15
+    GIT_WGET_TMP_DIR=$(mktemp -d "/tmp/$(basename "$0").$$.tmp.XXXXXX")
+    local trap_cmd="[[ -d $GIT_WGET_TMP_DIR ]] && rm -rf $GIT_WGET_TMP_DIR"
+    # shellcheck disable=SC2064
+    [[ -z $GIT_WGET_DEBUG ]] && trap "$trap_cmd" 0 1 2 3 15
   else
     mkdir -p "$GIT_WGET_TMP_DIR" || exit $?
   fi
-  pushd $GIT_WGET_TMP_DIR >/dev/null 2>&1
+  pushd "$GIT_WGET_TMP_DIR" >/dev/null 2>&1 || return 1
   [[ -n $GIT_WGET_DEBUG ]] && echo 1>&2 "[DEBUG][tmp dir]: $GIT_WGET_TMP_DIR"
 
   local clone_url
@@ -46,14 +48,14 @@ function git_wget_main() {
   if [[ ! -e $repo_name ]]; then
     git clone --depth 1 "$clone_url" || return 1
   else
-    pushd "$repo_name" >/dev/null 2>&1
+    pushd "$repo_name" >/dev/null 2>&1 || return 1
     # NOTE: if there is a lot of diff, use upper git clone code
     git pull || return 1
-    popd >/dev/null 2>&1
+    popd >/dev/null 2>&1 || return 1
   fi
   [[ -n $GIT_WGET_DEBUG ]] && echo 1>&2 '[DEBUG][command]' cp -R "$repo_name/$target_path" "$dst_path"
   cp -R "$repo_name/$target_path" "$dst_path" || return 1
-  popd >/dev/null 2>&1
+  popd >/dev/null 2>&1 || return 1
 }
 
 git_wget_main "$@"
