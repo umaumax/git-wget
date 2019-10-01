@@ -35,18 +35,20 @@ function git_wget_main() {
   pushd "$GIT_WGET_TMP_DIR" >/dev/null 2>&1 || return 1
   [[ -n $GIT_WGET_DEBUG ]] && echo 1>&2 "[DEBUG][tmp dir]: $GIT_WGET_TMP_DIR"
 
+  local branch
   local clone_url
   local target_path
-  # TODO: update for blob/$branch
+  branch=$(printf '%s' "$url" | sed -E 's:^.*/(tree|blob)/([^/]*)/.*$:\2:g')
   clone_url=$(printf '%s' "$url" | sed -E 's:^(.*)/(tree|blob)/[^/]*/.*$:\1:g')
   target_path=$(printf '%s' "$url" | sed -E 's:^.*/(tree|blob)/[^/]*/(.*)$:\2:g')
+  [[ -z $branch ]] && echo "Cannot get branch name from '$url'" && return 1
   [[ -z $clone_url ]] && echo "Cannot get clone url from '$url'" && return 1
   [[ -z $target_path ]] && echo "Cannot get target path from '$url'" && return 1
   local repo_name
   repo_name=$(printf '%s' "$url" | sed -E 's:^.*/github.com/[^/]*/([^/]*)/(.*)$:\1:g')
   [[ -z $repo_name ]] && echo "Cannot get repo name from '$url'" && return 1
   if [[ ! -e $repo_name ]]; then
-    git clone --depth 1 "$clone_url" || return 1
+    git clone -b "$branch" --depth 1 "$clone_url" || return 1
   else
     pushd "$repo_name" >/dev/null 2>&1 || return 1
     # NOTE: if there is a lot of diff, use upper git clone code
