@@ -18,5 +18,10 @@ wget https://raw.githubusercontent.com/umaumax/git-wget/master/git-wget -O "$ins
 chmod u+x "$install_path"
 ```
 
+for zsh completion
+```
+wget https://raw.githubusercontent.com/umaumax/git-wget/master/_git_wget -O /usr/local/share/zsh/site-functions
+```
+
 ## FYI
 * [sdushantha/gitdir: 📁 Download a single directory/folder from a GitHub repo]( https://github.com/sdushantha/gitdir )
