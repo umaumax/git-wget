@@ -2,16 +2,7 @@
 
 _git_wget() {
   emulate -L zsh
-
-  _values \
-    'url' \
-    'http\://[-O DIR]'
-    # WARN: you must split definition
-    # 'https\://[-O DIR]'
-
-  _values \
-    'url' \
-    'http\://[-O DIR]'
+  _message -r 'e.g. git-wget [git urls] (-O output_path)'
 
   _values \
     'options' \
