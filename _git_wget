@@ -1,0 +1,24 @@
+#compdef git-wget
+
+_git_wget() {
+  emulate -L zsh
+
+  _values \
+    'url' \
+    'http\://[-O DIR]'
+    # WARN: you must split definition
+    # 'https\://[-O DIR]'
+
+  _values \
+    'url' \
+    'http\://[-O DIR]'
+
+  _values \
+    'options' \
+    "-h[show this help message and exit]" \
+    "--help[show this help message and exit]" \
+    "-O[download target url file or dir to output filepath]"
+
+  # NOTE: at _git_xxx _files are added automatically
+  # _files
+}
