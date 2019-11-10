@@ -10,6 +10,13 @@ _git_wget() {
     "--help[show this help message and exit]" \
     "-O[download target url file or dir to output filepath]"
 
+  _values \
+    'enviroment variables' \
+    "GIT_WGET_TMP_DIR[default: tmp dir]" \
+    "GIT_WGET_DEBUG[default: 0]" \
+    "GIT_SPARSE_CHECKOUT_ENABLE[default: 1]" \
+    "GITHUB_RAW_FILE_ACCESS_FLAG[default: 0]"
+
   # NOTE: at _git_xxx _files are added automatically
   # _files
 }
