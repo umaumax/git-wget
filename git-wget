@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -eu
+
 function cmdcheck() { type >/dev/null 2>&1 "$@"; }
 ! cmdcheck git && echo 1>&2 'Not found git command' && return 1
 
@@ -8,7 +10,7 @@ function abspath() {
 }
 
 function help() {
-  echo "$(basename "$0") [git urls] (-O output_path)" 1>&2
+  echo "$(basename "$0") [git url] (-O output_path)" 1>&2
   exit 1
 }
 function git_wget_main() {
@@ -24,6 +26,8 @@ function git_wget_main() {
     fi
   fi
 
+  GIT_WGET_TMP_DIR=${GIT_WGET_TMP_DIR:-}
+  GIT_WGET_DEBUG=${GIT_WGET_DEBUG:-}
   # NOTE: setup git clone tmp dir
   if [[ -z $GIT_WGET_TMP_DIR ]]; then
     GIT_WGET_TMP_DIR=$(mktemp -d "/tmp/$(basename "$0").$$.tmp.XXXXXX")
