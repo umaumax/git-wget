@@ -29,6 +29,29 @@ function git_wget_main() {
   GIT_WGET_TMP_DIR=${GIT_WGET_TMP_DIR:-}
   GIT_WGET_DEBUG=${GIT_WGET_DEBUG:-}
   GIT_SPARSE_CHECKOUT_ENABLE=${GIT_SPARSE_CHECKOUT_ENABLE:-1}
+  GITHUB_RAW_FILE_ACCESS_FLAG=${GITHUB_RAW_FILE_ACCESS_FLAG:-0}
+
+  if [[ $GITHUB_RAW_FILE_ACCESS_FLAG != 0 ]]; then
+    local filename
+    filename="$(basename "$url")"
+    # NOTE: maybe file url shortcut command
+    if [[ $filename =~ \. ]]; then
+      if [[ -d $dst_path ]]; then
+        dst_path="${dst_path}/${filename}"
+      fi
+      # NOTE: this can be return dir html
+      # wget "${url}?raw=true" -O "$dst_path"
+      local raw_file_url
+      raw_file_url="${url//github.com/raw.githubusercontent.com}"
+      raw_file_url="${raw_file_url//blob\//}"
+      if wget "$raw_file_url" -O "$dst_path"; then
+        return
+      else
+        printf '%s' "[log] maybe this url refer dir (not file)"
+      fi
+    fi
+  fi
+
   # NOTE: setup git clone tmp dir
   if [[ -z $GIT_WGET_TMP_DIR ]]; then
     GIT_WGET_TMP_DIR=$(mktemp -d "/tmp/$(basename "$0").$$.tmp.XXXXXX")
