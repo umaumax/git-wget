@@ -99,7 +99,7 @@ function git_wget_main() {
   else
     pushd "$repo_name" >/dev/null 2>&1 || return 1
     # NOTE: if there is a lot of diff, use upper git clone code
-    git pull || return 1
+    git pull --depth=1 origin "$branch" || return 1
     popd >/dev/null 2>&1 || return 1
   fi
   [[ -n $GIT_WGET_DEBUG ]] && echo 1>&2 '[DEBUG][command]' cp -R "$repo_name/$target_path" "$dst_path"
