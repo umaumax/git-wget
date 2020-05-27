@@ -75,16 +75,18 @@ function git_wget_main() {
   [[ -z $target_path ]] && echo "Cannot get target path from '$url'" && return 1
   local repo_name
   repo_name=$(printf '%s' "$url" | sed -E 's:^.*/github.com/[^/]*/([^/]*)/(.*)$:\1:g')
-  [[ -z $repo_name ]] && echo "Cannot get repo name from '$url'" && return 1
-  if [[ ! -e $repo_name ]]; then
+  # WARN: don't use raw repo name, because if user use this command to same repo of defferent files
+  local repo_dir_name="${repo_name}~${target_path//\//_}"
+  [[ -z $repo_dir_name ]] && echo "Cannot get repo name from '$url'" && return 1
+  if [[ ! -e $repo_dir_name ]]; then
     # NOTE: v1.7.0~?
     # FYI: [version control \- Sparse checkout in Git 1\.7\.0? \- Stack Overflow]( https://stackoverflow.com/questions/2336580/sparse-checkout-in-git-1-7-0 )
     if [[ $GIT_SPARSE_CHECKOUT_ENABLE == 0 ]]; then
-      git clone -b "$branch" --depth 1 "$clone_url" || return 1
+      git clone -b "$branch" --depth 1 "$clone_url" "$repo_dir_name" || return 1
     else
       # NOTE: sparse checkout version
-      mkdir -p "$repo_name"
-      pushd "$repo_name"
+      mkdir -p "$repo_dir_name"
+      pushd "$repo_dir_name"
       git init
       git config core.sparsecheckout true
       git remote add origin "$clone_url"
@@ -97,13 +99,18 @@ function git_wget_main() {
       popd
     fi
   else
-    pushd "$repo_name" >/dev/null 2>&1 || return 1
+    pushd "$repo_dir_name" >/dev/null 2>&1 || return 1
     # NOTE: if there is a lot of diff, use upper git clone code
-    git pull --depth=1 origin "$branch" || return 1
+    if ! git pull --rebase --depth=1 origin "$branch"; then
+      echo -n $'\e[31m'
+      echo "[FALIED] git pull --rebase --depth=1 origin '$branch' at '$PWD'"
+      echo -n $'\e[0m'
+      return 1
+    fi
     popd >/dev/null 2>&1 || return 1
   fi
-  [[ -n $GIT_WGET_DEBUG ]] && echo 1>&2 '[DEBUG][command]' cp -R "$repo_name/$target_path" "$dst_path"
-  cp -R "$repo_name/$target_path" "$dst_path" || return 1
+  [[ -n $GIT_WGET_DEBUG ]] && echo 1>&2 '[DEBUG][command]' cp -R "$repo_dir_name/$target_path" "$dst_path"
+  cp -R "$repo_dir_name/$target_path" "$dst_path" || return 1
   popd >/dev/null 2>&1 || return 1
 }
 
