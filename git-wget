@@ -101,9 +101,9 @@ function git_wget_main() {
   else
     pushd "$repo_dir_name" >/dev/null 2>&1 || return 1
     # NOTE: if there is a lot of diff, use upper git clone code
-    if ! git pull --rebase --depth=1 origin "$branch"; then
+    if ! git pull --rebase origin "$branch"; then
       echo -n $'\e[31m'
-      echo "[FALIED] git pull --depth=1 origin '$branch' at '$PWD'"
+      echo "[FALIED] git pull --rebase origin '$branch' at '$PWD'"
       echo -n $'\e[0m'
       return 1
     fi
