@@ -23,6 +23,9 @@ for zsh completion
 wget https://raw.githubusercontent.com/umaumax/git-wget/master/_git_wget -O /usr/local/share/zsh/site-functions
 ```
 
+## TODO
+* check git clone with single branch mode
+
 ## FYI
 * [sdushantha/gitdir: 📁 Download a single directory/folder from a GitHub repo]( https://github.com/sdushantha/gitdir )
 * [Git で shallow clone するときに全ブランチの最新履歴を取得する]( https://zenn.dev/snowcait/articles/d44d6b2bed2e4b29ada4 )
